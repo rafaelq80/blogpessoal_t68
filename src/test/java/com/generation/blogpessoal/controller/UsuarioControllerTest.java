@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.generation.blogpessoal.model.Usuario;
+import com.generation.blogpessoal.model.UsuarioLogin;
 import com.generation.blogpessoal.repository.UsuarioRepository;
 import com.generation.blogpessoal.service.UsuarioService;
 
@@ -124,5 +125,37 @@ public class UsuarioControllerTest {
 		/* Verifica o HTTP Status Code */
 		assertEquals(HttpStatus.OK, corpoResposta.getStatusCode());
 		
+	}
+	
+	@Test
+	@DisplayName("😬 Listar Um Usuário Específico")
+	public void deveListarApenasUmUsuario() {
+	
+		Optional<Usuario> usuarioBusca = usuarioService.cadastrarUsuario(new Usuario(0L, 
+				"Laura Santolia", "laura_santolia@email.com.br", "laura12345", "-"));
+			
+		ResponseEntity<String> resposta = testRestTemplate
+				.withBasicAuth("root@root.com", "rootroot")
+				.exchange("/usuarios/" + usuarioBusca.get().getId(), HttpMethod.GET, null, String.class);
+
+		assertEquals(HttpStatus.OK, resposta.getStatusCode());
+		
+	}
+
+	@Test
+	@DisplayName("😮 Login do Usuário")
+	public void deveAutenticarUsuario() {
+
+		usuarioService.cadastrarUsuario(new Usuario(0L, 
+			"Marisa Souza", "marisa_souza@email.com.br", "13465278", "-"));
+
+		HttpEntity<UsuarioLogin> corpoRequisicao = new HttpEntity<UsuarioLogin>(new UsuarioLogin(0L, 
+			"", "marisa_souza@email.com.br", "13465278", "", ""));
+
+		ResponseEntity<UsuarioLogin> corpoResposta = testRestTemplate
+			.exchange("/usuarios/logar", HttpMethod.POST, corpoRequisicao, UsuarioLogin.class);
+
+		assertEquals(HttpStatus.OK, corpoResposta.getStatusCode());
+
 	}
 }
